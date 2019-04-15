@@ -5,40 +5,34 @@ import os
 # Create a database only if one does not exist
 
 
-class create_database:
+class Database:
 
-    db_filename = "sensor_data.db"
+    # db_filename = "sensor_data.db"
 
-    def __init__(self):
-
-        self.db_exists = not os.path.exists(self.db_filename)
-
-        if self.db_exists:
-            self.conn = sqlite3.connect(self.db_filename)
-            self.conn.commit()
-            self.conn.close()
-            print('Database created.')
-        else:
-            print('Database already exists.')
-
-
-class create_table:
-    db_filename = "sensor_data.db"
-
-    def __init__(self, sensor_name):
-
-        self.conn = sqlite3.connect(self.db_filename)
+    def __init__(self, db_name):
+        self.conn = sqlite3.connect(db_name)
         self.cur = self.conn.cursor()
+        # print('Database {} has been created'.format(db_name))
+
+    def create_table(self, table_name):
+
         self.cur.execute("""CREATE TABLE IF NOT EXISTS %s (
                             UNIT real,
                             VALUE real,
                             timedate text
-                            )""" % (sensor_name,))
+                            )""" % table_name)
         self.conn.commit()
-        self.conn.close()
+
+    def drop_table(self, table_name):
+        self.cur.execute("""DROP TABLE %s""" % table_name)
+        self.conn.commit()
 
 
+db_name = "sensor_data.db"
 table_name = input("Please enter the table name: ")
 
-create_database()
-create_table(table_name)
+db = Database(db_name)
+db.create_table(table_name)
+
+db_del = input("please enter db_del :")
+db.drop_table(db_del)
