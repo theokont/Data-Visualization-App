@@ -146,10 +146,9 @@ for yearly in range(len(yearly_plot)):
 # ---- PLOT DATA USING PLOTLY (works but got issues with how it shows the bars) -----
 
 # Store in plot_data the Bar Graphic Object
-# plot_data = [go.Bar(x=monthly_plot_x, y=monthly_plot_y)]
-# layout = dict(xaxis=dict(type="date")) #{'data': plot_data, 'layout': layout}
+plot_data = [go.Bar(x=monthly_plot_x, y=monthly_plot_y)]
 # Plot the Bar Graphic Object
-# plotly.offline.plot(plot_data, filename='yearly.html', auto_open=True)
+plotly.offline.plot(plot_data, filename='yearly.html', auto_open=True)
 
 # pp.pprint(monthly_plot_x)
 
