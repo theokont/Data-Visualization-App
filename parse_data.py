@@ -1,4 +1,4 @@
-import re
+# import re
 import xml.etree.ElementTree as ET
 
 
@@ -22,10 +22,11 @@ class Parser:
             # print(self.int_val)
         for el in self.root.iter('TIME'):
             self.time_stamp = el.text
-            self.re_compiled = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})")
-            self.re_result = self.re_compiled.match(self.time_stamp)
-            self.date = self.re_result.group(1)
-            self.time = self.re_result.group(2)
+            # self.re_compiled = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})")
+            # self.re_result = self.re_compiled.match(self.time_stamp)
+            # self.date = self.re_result.group(1)
+            # self.time = self.re_result.group(2)
+
             # return self.time_stamp
             # print('Date: {}, Time: {}'.format(self.date, self.time))
 
@@ -33,11 +34,6 @@ class Parser:
         #     self.name = table_name.attrib['NAME']
         #     # return self.name
         #     print(self.name)
+        # if self.unit == "CM":
 
         return self.unit, self.val, self.time_stamp
-
-
-# if __name__ == '__main__':
-#     prs = Parser('dummy.xml')
-#     example = prs.fetch_values()
-#     print(example)
