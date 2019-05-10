@@ -37,3 +37,8 @@ class Parser:
         # if self.unit == "CM":
 
         return self.unit, self.val, self.time_stamp
+
+    def fetch_name(self):
+        for sensor_name in self.root.iter('NAME'):
+            self.name = sensor_name.text
+        return self.name

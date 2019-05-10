@@ -1,7 +1,7 @@
 from create_db import Database
 from parse_data import Parser
 import os
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 import pprint
 import plotly
 import plotly.graph_objs as go
@@ -62,8 +62,8 @@ def weekly_select():
     # print(type(last_date))
     # weekly_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(" + str(
     # last_date[0][0]) + ", '-7 days') AND \"" + str(last_date[0][0]) + "\""
-    weekly_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
-        last_date[0][0] + "\", '-7 days') AND DATETIME(\"" + \
+    weekly_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
+        last_date[0][0] + "\", '-7 days') AND TIME <= DATETIME(\"" + \
         last_date[0][0] + "\")"
     # print(weekly_query)
     weekly = db.select_values(weekly_query)
@@ -75,8 +75,8 @@ def monthly_select():
     query = "SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"
     last_date = db.select_values(query)
 
-    monthly_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
-        last_date[0][0] + "\", 'start of month') AND DATETIME(\"" +\
+    monthly_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
+        last_date[0][0] + "\", 'start of month') AND TIME <= DATETIME(\"" +\
         last_date[0][0] + "\")"
 
     monthly = db.select_values(monthly_query)
@@ -89,8 +89,8 @@ def yearly_select():
     query = "SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"
     last_date = db.select_values(query)
 
-    yearly_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
-        last_date[0][0] + "\", 'start of year') AND DATETIME(\"" +\
+    yearly_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
+        last_date[0][0] + "\", 'start of year') AND TIME <= DATETIME(\"" +\
         last_date[0][0] + "\")"
 
     yearly = db.select_values(yearly_query)
@@ -103,8 +103,8 @@ def daily_select():
     query = "SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"
     last_date = db.select_values(query)
 
-    daily_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
-        last_date[0][0] + "\", '-1 day') AND DATETIME(\"" +\
+    daily_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
+        last_date[0][0] + "\", '-1 day') AND TIME <= DATETIME(\"" +\
         last_date[0][0] + "\")"
 
     daily = db.select_values(daily_query)
@@ -113,9 +113,21 @@ def daily_select():
     return daily
 
 
-# monthly_select()
-# print("------------------------------------------------")
-# daily_select()
+# Here we create the 2 lists that are going to be plotly's arguments
+# daily
+daily_plot_x = []
+daily_plot_y = []
+daily_plot = daily_select()
+for daily in range(len(daily_plot)):
+    daily_plot_x.append(daily_plot[daily][2])
+
+for daily in range(len(daily_plot)):
+    daily_plot_y.append(int(daily_plot[daily][1]))
+
+daily_datetime = []
+for i in range(len(daily_plot_x)):
+    daily_datetime.append(datetime.strptime(daily_plot_x[i], "%Y-%m-%dT%H:%M:%S.%fZ"))
+
 
 # Here we create the 2 lists that are going to be plotly's arguments
 # monthly
@@ -126,7 +138,11 @@ for monthly in range(len(monthly_plot)):
     monthly_plot_x.append(monthly_plot[monthly][2])
 
 for monthly in range(len(monthly_plot)):
-    monthly_plot_y.append(monthly_plot[monthly][1])
+    monthly_plot_y.append(int(monthly_plot[monthly][1]))
+
+test_datetime = []
+for i in range(len(monthly_plot_x)):
+    test_datetime.append(datetime.strptime(monthly_plot_x[i], "%Y-%m-%dT%H:%M:%S.%fZ"))
 
 # pp.pprint(monthly_plot_y)
 
@@ -138,19 +154,106 @@ for yearly in range(len(yearly_plot)):
     yearly_plot_x.append(yearly_plot[yearly][2])
 
 for yearly in range(len(yearly_plot)):
-    yearly_plot_y.append(yearly_plot[yearly][1])
+    yearly_plot_y.append(int(yearly_plot[yearly][1]))
+
+yearly_datetime = []
+for i in range(len(yearly_plot_x)):
+    yearly_datetime.append(datetime.strptime(yearly_plot_x[i], "%Y-%m-%dT%H:%M:%S.%fZ"))
 
 # pp.pprint(yearly_plot_y)
+# Create a new list with monthly X axis converted in datetime objects
+
+# ---------------------------------------------------------------------------------
+# d = timedelta(days=1)
+# trace1 = go.Scatter(
+#     x=daily_datetime,
+#     y=daily_plot_y,
+#     mode='markers')
+# data = [trace1]
+# layout = go.Layout(xaxis=dict(
+#                    range=[daily_datetime[0]-d,
+#                           daily_datetime[-1]+d]
+#                    ))
+# fig = go.Figure(data=data, layout=layout)
+# plotly.offline.plot(fig, filename='daily.html', auto_open=True)
+# ---------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------
+# d = timedelta(days=1)
+# trace1 = go.Scatter(
+#     x=test_datetime,
+#     y=monthly_plot_y,
+#     mode='markers')
+# data = [trace1]
+# layout = go.Layout(xaxis=dict(
+#                    range=[test_datetime[0]-d,
+#                           test_datetime[-1]+d]
+#                    ),
+#                    title="Alpine_K81_Height",
+#                    autosize=True,
+#                    annotations=[
+#     dict(
+#         x=0.5,
+#         y=-0.09,
+#         showarrow=False,
+#         text="nope",
+#         xref='paper',
+#         yref='paper'
+#     ),
+#     dict(
+#         x=-0.04,
+#         y=0.5,
+#         showarrow=False,
+#         text='Custom y-axis title',
+#         textangle=-90,
+#         xref='paper',
+#         yref='paper'
+#     )
+# ]
+# )
+# fig = go.Figure(data=data, layout=layout)
+# plotly.offline.plot(fig, filename='monthly.html', auto_open=True)
+# ---------------------------------------------------------------------------------
+d = timedelta(days=1)
+trace1 = go.Scatter(
+    x=yearly_datetime,
+    y=yearly_plot_y,
+    mode='markers')
+data = [trace1]
+layout = go.Layout(xaxis=dict(
+    range=[yearly_datetime[0]-d,
+           yearly_datetime[-1]+d]
+))
+fig = go.Figure(data=data, layout=layout)
+plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
+# ---------------------------------------------------------------------------------
+# d = timedelta(days=1)
+# trace1 = go.Bar(
+#     x=yearly_datetime,
+#     y=yearly_plot_y)
+# # mode='markers')
+# data = [trace1]
+# layout = go.Layout(xaxis=dict(
+#                    range=[yearly_datetime[0]-d,
+#                           yearly_datetime[-1]+d]),
+#
+#                    bargap=0.15,
+#                    bargroupgap=0
+#                    )
+# fig = go.Figure(data=data, layout=layout)
+# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
+# ---------------------------------------------------------------------------------
 
 
 # ---- PLOT DATA USING PLOTLY (works but got issues with how it shows the bars) -----
 
 # Store in plot_data the Bar Graphic Object
-plot_data = [go.Bar(x=monthly_plot_x, y=monthly_plot_y)]
-# Plot the Bar Graphic Object
-plotly.offline.plot(plot_data, filename='yearly.html', auto_open=True)
+# plot_data=[go.Bar(x=test_datetime, y=monthly_plot_y)]
 
-# pp.pprint(monthly_plot_x)
+# Plot the Bar Graphic Object
+# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
+
+# print(type(monthly_plot_y[0]))
 
 # -----------------------------------------------------------------------------------
 

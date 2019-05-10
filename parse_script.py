@@ -10,7 +10,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 data = []
 db = Database("sensor_data.db")
 db.clear_table("sensor")
-
+# sensor_name = None
 # Searches the current directory and every one below for every file that ends with .xml and parses it
 
 for subdir, dirs, files in os.walk(dir_path):
@@ -29,6 +29,9 @@ for subdir, dirs, files in os.walk(dir_path):
                 data.append(prs.fetch_values())
             else:
                 pass
+            # if prs.fetch_values()[0] == "CM" and not sensor_name:
+            #     sensor_name = prs.fetch_name()
+
 
 data.sort(key=lambda x: datetime.strptime(x[2], "%Y-%m-%dT%H:%M:%S.0%fZ"))
 # pp = pprint.PrettyPrinter(indent=2)
