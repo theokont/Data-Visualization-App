@@ -1,5 +1,7 @@
 import xml.etree.cElementTree as ET
 from datetime import datetime, timedelta
+import random
+
 
 # "%Y-%m-%dT%H:%M:%S.0%fZ"
 t = timedelta(minutes=60)
@@ -21,6 +23,7 @@ for i in range(1000):
     time_time_only.strftime("H:%M:%S.0%fZ")
     final_time = str(time_date_only)+'T'+str(time_time_only) + 'Z'
     date_list.append(final_time)
+    # print(type(final_time))
 
     root = ET.Element("ALPINE_MEASUREMENT")
     site = ET.Element("Site", name="ALPINE_KASTORIA")
@@ -35,7 +38,7 @@ for i in range(1000):
     ET.SubElement(id, "TYPE").text = "Distance_Sensor"
     ET.SubElement(id, "UNIT").text = "CM"
     ET.SubElement(id, "NAME").text = "Alpine_K81_Height"
-    ET.SubElement(id, "VALUE").text = str(i+100)
+    ET.SubElement(id, "VALUE").text = str(random.uniform(100, 350))
     ET.SubElement(id, "VARIABLETYPE").text = "xs:double"
     ET.SubElement(id, "TIME").text = final_time
 
