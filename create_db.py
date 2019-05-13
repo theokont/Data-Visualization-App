@@ -37,13 +37,15 @@ class Database:
         # (dld tha exw ena string pou tha to vazw san input edw)
         # self.cur.execute(prepared_statement)
         self.cur.execute("SELECT * FROM sensor")
-        return self.cur.fetchall()
-        self.con.commit()
+        self.selected_all_values = self.cur.fetchall()
+        self.conn.commit()
+        return self.selected_all_values
 
     def select_values(self, select_string):
         self.cur.execute(select_string)
-        return self.cur.fetchall()
-        self.con.commit()
+        self.selected_values = self.cur.fetchall()
+        self.conn.commit()
+        return self.selected_values
 
     def clear_table(self, table_name):
         self.cur.execute("""DELETE FROM %s""" % table_name)
