@@ -21,10 +21,15 @@ class Window(QWidget):
 
         self.createCalendarBox()
         self.setup_database_dialog()
+        self.database_utilities()
+        self.ready_plots()
 
         layout = QGridLayout()
         layout.addWidget(self.db_dialog_groupbox, 0, 0)
         layout.addWidget(self.previewGroupBox, 0, 1)
+        layout.addWidget(self.db_util_groupbox, 1, 0)
+        layout.addWidget(self.ready_plt_groupbox, 1, 1)
+
         # layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(layout)
         self.previewLayout.setRowMinimumHeight(0,
@@ -56,27 +61,55 @@ class Window(QWidget):
         # Creating sub layouts and adding their widgets
         self.cal_options = QGridLayout()
 
-        self.mode_label = QLabel("&Mode")
-        self.custom_mode = QComboBox()
-        self.custom_mode.addItem("Lines")
-        self.custom_mode.addItem("Lines and Markers")
-        self.custom_mode.addItem("Scatter")
-        self.custom_mode.addItem("Bars")
-        self.mode_label.setBuddy(self.custom_mode)
+        self.chart_label = QLabel("&Chart")
+        self.chart_field = QComboBox()
+        self.chart_field.addItem("Lines")
+        self.chart_field.addItem("Lines and Markers")
+        self.chart_field.addItem("Scatter")
+        self.chart_field.addItem("Bars")
+        self.chart_label.setBuddy(self.chart_field)
 
-        # Attempt for better visuals
+        # Mode Layout
         self.h_mode_layout = QHBoxLayout()
-        self.h_mode_layout.addWidget(self.mode_label)
-        self.h_mode_layout.addWidget(self.custom_mode)
+        self.h_mode_layout.addWidget(self.chart_label)
+        self.h_mode_layout.addWidget(self.chart_field)
 
-        self.from_to_dates_layout = QHBoxLayout()
+        self.from_to_dates_layout = QVBoxLayout()
+
+        # From Layout
+        self.from_date_layout = QHBoxLayout()
+        self.from_date_label = QLabel("From")
         self.from_date = QDateEdit()
+        self.update_from_date = QPushButton("Update Date")
         self.from_date.setDisplayFormat('MMM d yyyy')
         self.from_date.setDate(self.calendar.selectedDate())
-        self.from_date_label = QLabel("From")
+        self.update_from_date.clicked.connect(self.from_selectedDateChanged)
+        # self.calendar.selectionChanged.connect(self.from_selectedDateChanged)
 
+        # Adds widgets to from_date_layout QHBoxLayout
+        self.from_date_layout.addWidget(self.from_date)
+        self.from_date_layout.addWidget(self.update_from_date)
+
+        # To layout
+        self.to_date_layout = QHBoxLayout()
+        self.to_date_label = QLabel("To")
+        self.to_date = QDateEdit()
+        self.update_to_date = QPushButton("Update Date")
+        self.to_date.setDisplayFormat('MMM d yyyy')
+        self.to_date.setDate(self.calendar.selectedDate())
+        self.update_to_date.clicked.connect(self.to_selectedDateChanged)
+
+        # Adds widgets to to_date_layout QHBoxLayout
+        self.to_date_layout.addWidget(self.to_date)
+        self.to_date_layout.addWidget(self.update_to_date)
+
+        # self.calendar.selectionChanged.connect(self.to_selectedDateChanged)
+
+        # Add widgets and QHBoxLayout to our QVBoxLayout
         self.from_to_dates_layout.addWidget(self.from_date_label)
-        self.from_to_dates_layout.addWidget(self.from_date)
+        self.from_to_dates_layout.addLayout(self.from_date_layout)
+        self.from_to_dates_layout.addWidget(self.to_date_label)
+        self.from_to_dates_layout.addLayout(self.to_date_layout)
 
         self.custom_plot_button = QPushButton("Custom Plot")
 
@@ -95,12 +128,14 @@ class Window(QWidget):
     def setup_database_dialog(self):
         # Create Groupbox
         self.db_dialog_groupbox = QGroupBox("Database Creation and Data Import")
+
         # Create widgets
-        self.unit_label = QLabel("Provide the unit of the measurements")
+
         self.db_label = QLabel("Provide a name for the database, e.g. sensor_db.db")
         self.path_label = QLabel("Provide path to search for .xml files")
+        # self.unit_label = QLabel("Provide the unit of the measurements")
 
-        self.unit_field = QLineEdit("unit")
+        # self.unit_field = QLineEdit("unit")
         self.db_field = QLineEdit("sensor_db.db")
         self.path_field = QLineEdit(str(os.path.dirname(os.path.realpath(__file__))))
         self.button = QPushButton("Get started")
@@ -155,7 +190,87 @@ class Window(QWidget):
         msg.show()
 
     def database_utilities(self):
-        pass
+        # Create Groupbox
+        self.db_util_groupbox = QGroupBox("Database Utilities")
+
+        # Create Widgets
+        self.db_update_field = QLineEdit("")
+        self.db_update_label = QLabel("Enter the Database you wish to update")
+        self.path_label = QLabel("Xml File Path")
+        self.path_field = QLineEdit(str(os.path.dirname(os.path.realpath(__file__))))
+        self.update_button = QPushButton("Update")
+        self.update_title = QLabel("Update Database")
+        self.db_clear_field = QLineEdit("")
+        self.db_clear_label = QLabel("Enter Database name")
+        self.clear_button = QPushButton("Clear Table")
+        self.clear_title = QLabel("Clear the table of a Database")
+
+        # Add Widgets
+
+        self.db_util_db_update = QHBoxLayout()
+        self.db_util_db_update.addWidget(self.db_update_label)
+        self.db_util_db_update.addWidget(self.db_update_field)
+
+        self.db_util_path = QHBoxLayout()
+        self.db_util_path.addWidget(self.path_label)
+        self.db_util_path.addWidget(self.path_field)
+
+        self.db_util_clear = QHBoxLayout()
+        self.db_util_clear.addWidget(self.db_clear_label)
+        self.db_util_clear.addWidget(self.db_clear_field)
+
+        self.db_util_vbox_layout = QVBoxLayout()
+        self.db_util_vbox_layout.addWidget(self.update_title)
+        self.db_util_vbox_layout.addLayout(self.db_util_db_update)
+        self.db_util_vbox_layout.addLayout(self.db_util_path)
+        self.db_util_vbox_layout.addWidget(self.update_button)
+        self.db_util_vbox_layout.addWidget(self.clear_title)
+        self.db_util_vbox_layout.addLayout(self.db_util_clear)
+        self.db_util_vbox_layout.addWidget(self.clear_button)
+
+        # Set dialog layout
+        self.db_util_groupbox.setLayout(self.db_util_vbox_layout)
+
+    def ready_plots(self):
+        # Create Groupbox
+        self.ready_plt_groupbox = QGroupBox("Ready-to-use plots")
+
+        # Create Widgets
+        self.choose_db_label = QLabel(
+            "Provide the database that contains the data you wish to plot")
+        self.choose_db_field = QLineEdit("")
+        self.chart_label = QLabel("Chart")
+        self.chart_field = QComboBox()
+        self.chart_field.addItem("Lines")
+        self.chart_field.addItem("Lines and Markers")
+        self.chart_field.addItem("Scatter")
+        self.chart_field.addItem("Bars")
+        self.plot_mode_label = QLabel("Choose what chronic period to plot")
+        self.plot_mode_field = QComboBox()
+        self.plot_mode_field.addItem("Daily")
+        self.plot_mode_field.addItem("Weekly")
+        self.plot_mode_field.addItem("Monthly")
+        self.plot_mode_field.addItem("Yearly")
+        self.plot_button = QPushButton("Plot")
+
+        # Add Widgets
+        self.plot_vbox_layout = QVBoxLayout()
+        self.plot_vbox_layout.addWidget(self.choose_db_label)
+        self.plot_vbox_layout.addWidget(self.choose_db_field)
+        self.plot_vbox_layout.addWidget(self.chart_label)
+        self.plot_vbox_layout.addWidget(self.chart_field)
+        self.plot_vbox_layout.addWidget(self.plot_mode_label)
+        self.plot_vbox_layout.addWidget(self.plot_mode_field)
+        self.plot_vbox_layout.addWidget(self.plot_button)
+
+        # Set layout to groupbox
+        self.ready_plt_groupbox.setLayout(self.plot_vbox_layout)
+
+    def from_selectedDateChanged(self):
+        self.from_date.setDate(self.calendar.selectedDate())
+
+    def to_selectedDateChanged(self):
+        self.to_date.setDate(self.calendar.selectedDate())
 
 
 if __name__ == "__main__":
