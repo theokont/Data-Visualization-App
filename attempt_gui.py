@@ -159,7 +159,7 @@ class Window(QWidget):
         error = "Error parsing files or path"
         db = self.db_field.text()
         db_interaction = DatabaseInteraction(db)  # returns object of class DatabaseInteraction
-        unit = self.unit_field.text()
+        # unit = self.unit_field.text()
         path = self.path_field.text()
         xml_importer = XMLImporter(db_interaction, path)
         try:
@@ -194,13 +194,13 @@ class Window(QWidget):
         self.db_util_groupbox = QGroupBox("Database Utilities")
 
         # Create Widgets
-        self.db_update_field = QLineEdit("")
+        self.db_update_field = QLineEdit("example.db")
         self.db_update_label = QLabel("Enter the Database you wish to update")
         self.path_label = QLabel("Xml File Path")
         self.path_field = QLineEdit(str(os.path.dirname(os.path.realpath(__file__))))
         self.update_button = QPushButton("Update")
         self.update_title = QLabel("Update Database")
-        self.db_clear_field = QLineEdit("")
+        self.db_clear_field = QLineEdit("example.db")
         self.db_clear_label = QLabel("Enter Database name")
         self.clear_button = QPushButton("Clear Table")
         self.clear_title = QLabel("Clear the table of a Database")
@@ -238,7 +238,7 @@ class Window(QWidget):
         # Create Widgets
         self.choose_db_label = QLabel(
             "Provide the database that contains the data you wish to plot")
-        self.choose_db_field = QLineEdit("")
+        self.choose_db_field = QLineEdit("example.db")
         self.chart_label = QLabel("Chart")
         self.chart_field = QComboBox()
         self.chart_field.addItem("Lines")
@@ -271,6 +271,32 @@ class Window(QWidget):
 
     def to_selectedDateChanged(self):
         self.to_date.setDate(self.calendar.selectedDate())
+
+    def ready_plot_script(self):
+        db = self.choose_db_field.text()
+        extr = Extractor(db)
+        db_interaction = DatabaseInteraction(db)  # returns object of class DatabaseInteraction
+        if self.chart_field.text() == "Lines":
+            chart_mode = "lines"
+        elif self.chart_field.text() == "Lines and Markers":
+            chart_mode = "lines+markers"
+        elif self.chart_field.text() == "Scatter":
+            chart_mode = "markers"
+        else:
+            cm_error = "Something went wrong"
+            return cm_error
+
+        if self.plot_mode_field.text() == "Daily":
+            plot_mode = "daily_select"
+        elif self.plot_mode_field.text() == "Weekly":
+            plot_mode = "weekly_select"
+        elif self.plot_mode_field.text() == "Monthly":
+            plot_mode = "monthly_select"
+        elif self.plot_mode_field.text() == "Yearly":
+            plot_mode = "yearly_select"
+        else:
+            pm_error = "Something went wrong"
+            return pm_error
 
 
 if __name__ == "__main__":
