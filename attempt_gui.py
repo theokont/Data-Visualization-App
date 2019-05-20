@@ -13,6 +13,7 @@ from data_layer.selects import Extractor
 import sys
 from data_layer.create_db import DatabaseInteraction
 from logic_layer.parse_script import XMLImporter
+from logic_layer.plotter import Plotter
 
 
 class Window(QWidget):
@@ -265,6 +266,7 @@ class Window(QWidget):
 
         # Set layout to groupbox
         self.ready_plt_groupbox.setLayout(self.plot_vbox_layout)
+        self.plot_button.clicked.connect(self.ready_plot_script)
 
     def from_selectedDateChanged(self):
         self.from_date.setDate(self.calendar.selectedDate())
@@ -275,28 +277,42 @@ class Window(QWidget):
     def ready_plot_script(self):
         db = self.choose_db_field.text()
         extr = Extractor(db)
-        db_interaction = DatabaseInteraction(db)  # returns object of class DatabaseInteraction
-        if self.chart_field.text() == "Lines":
+        plt = Plotter()
+        # db_interaction = DatabaseInteraction(db)  # returns object of class DatabaseInteraction
+        if self.chart_field == "Lines":
             chart_mode = "lines"
-        elif self.chart_field.text() == "Lines and Markers":
+        elif self.chart_field == "Lines and Markers":
             chart_mode = "lines+markers"
-        elif self.chart_field.text() == "Scatter":
+        elif self.chart_field == "Scatter":
             chart_mode = "markers"
         else:
             cm_error = "Something went wrong"
-            return cm_error
+            # return cm_error
+            pass
 
-        if self.plot_mode_field.text() == "Daily":
+        if self.plot_mode_field == "Daily":
             plot_mode = "daily_select"
-        elif self.plot_mode_field.text() == "Weekly":
+        elif self.plot_mode_field == "Weekly":
             plot_mode = "weekly_select"
-        elif self.plot_mode_field.text() == "Monthly":
+        elif self.plot_mode_field == "Monthly":
             plot_mode = "monthly_select"
-        elif self.plot_mode_field.text() == "Yearly":
+        elif self.plot_mode_field == "Yearly":
             plot_mode = "yearly_select"
         else:
             pm_error = "Something went wrong"
-            return pm_error
+            # return pm_error
+            pass
+
+        plot_lists = []
+        # Extract from the database the data for x-y axis and the unit
+        plot_mode = "monthly_select"
+        chart_mode = "lines+markers"
+        plot_lists = extr.extract(plot_mode)
+        # print(plot_lists[0])
+        # print("------------------------------------------------------------")
+        # print(plot_lists[1])
+        # print(plot_lists[2][0])
+        plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1], db, "TIME", plot_lists[2][0])
 
 
 if __name__ == "__main__":
