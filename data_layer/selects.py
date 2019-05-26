@@ -1,20 +1,11 @@
 from data_layer.create_db import DatabaseInteraction
 from datetime import datetime
-# from plotter import Plotter
-# will be removed
-# from create_db import DatabaseInteraction
-# import plotly
-# import plotly.graph_objs as go
-# from datetime import timedelta
 
 
 class Extractor:
 
     def __init__(self, db_name):
-
-        # self.plt = Plotter()
         self.db = DatabaseInteraction(db_name)
-# tha pairnei mono to mode mallon kai tha epistrefei o,ti xreiazomai gia na ta steilei stin plotter!
 
     def extract(self, mode):
 
@@ -50,7 +41,6 @@ class Extractor:
         else:
             error = "Something went wrong"
             return error
-        # (mode, self.daily_select()[0], self.daily_select()[1], "Daily", "TIME", self.daily_select()[2][0])
 
     # Get maximum of values by unit
 
@@ -96,6 +86,28 @@ class Extractor:
         query = "SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"
         last_row = self.db.select_values(query)
         return last_row
+
+    def custom_select(self, from_time, to_time):
+        custom_query = "SELECT * FROM sensor WHERE TIME BETWEEN  DATE(\"" + \
+            from_time + "\", '-7 days') AND DATE(\"" + \
+            to_time + "\")"
+        custom = self.db.select_values(custom_query)
+
+        custom_plot_x = []
+        custom_plot_y = []
+        custom_datetime_x = []
+
+        for i in range(len(custom)):
+            custom_plot_x.append(custom[i][2])
+
+        for i in range(len(custom)):
+            custom_plot_y.append(custom[i][1])
+
+        for i in range(len(custom_plot_x)):
+            custom_datetime_x.append(datetime.strptime(
+                custom_plot_x[i], "%Y-%m-%dT%H:%M:%S.%fZ"))
+
+        return custom_datetime_x, custom_plot_y, custom[0]
 
     def weekly_select(self):
         last_date_query = "SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"
@@ -205,194 +217,3 @@ class Extractor:
             daily_datetime_x.append(datetime.strptime(daily_plot_x[i], "%Y-%m-%dT%H:%M:%S.%fZ"))
 
         return daily_datetime_x, daily_plot_y, daily[0]
-
-
-# pp.pprint(monthly_plot_y)
-
-
-# pp.pprint(yearly_plot_y)
-# Create a new list with monthly X axis converted in datetime objects
-
-# ---------------------------------------------------------------------------------
-# d = timedelta(days=1)
-# trace1 = go.Scatter(
-#     x=daily_datetime,
-#     y=daily_plot_y,
-#     mode='markers')
-# data = [trace1]
-# layout = go.Layout(xaxis=dict(
-#                    range=[daily_datetime[0]-d,
-#                           daily_datetime[-1]+d]
-#                    ))
-# fig = go.Figure(data=data, layout=layout)
-# plotly.offline.plot(fig, filename='daily.html', auto_open=True)
-# ---------------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------------
-# d = timedelta(days=1)
-# trace1 = go.Scatter(
-#     x=test_datetime,
-#     y=monthly_plot_y,
-#     mode='lines')
-# data = [trace1]
-# layout = go.Layout(xaxis=dict(
-#                    range=[test_datetime[0]-d,
-#                           test_datetime[-1]+d]
-#                    ),
-#                    title="Alpine_K81_Height",
-#                    autosize=True,
-#                    annotations=[
-#     dict(
-#         x=0.5,
-#         y=-0.09,
-#         showarrow=False,
-#         text="nope",
-#         xref='paper',
-#         yref='paper'
-#     ),
-#     dict(
-#         x=-0.04,
-#         y=0.5,
-#         showarrow=False,
-#         text='Custom y-axis title',
-#         textangle=-90,
-#         xref='paper',
-#         yref='paper'
-#     )
-# ]
-# )
-# fig = go.Figure(data=data, layout=layout)
-# plotly.offline.plot(fig, filename='monthly.html', auto_open=True)
-# ---------------------------------------------------------------------------------
-# d = timedelta(days=1)
-# trace1 = go.Scatter(
-#     x=yearly_datetime,
-#     y=yearly_plot_y,
-#     mode='markers')
-# data = [trace1]
-# layout = go.Layout(xaxis=dict(
-#     range=[yearly_datetime[0]-d,
-#            yearly_datetime[-1]+d]
-# ))
-# fig = go.Figure(data=data, layout=layout)
-# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
-# ---------------------------------------------------------------------------------
-# d = timedelta(days=1)
-# trace1 = go.Bar(
-#     x=yearly_datetime,
-#     y=yearly_plot_y,
-#     # orientation='h'
-# )
-#
-# # mode='markers')
-# data = [trace1]
-# layout = go.Layout(xaxis=dict(
-#                    range=[yearly_datetime[0]-d,
-#                           yearly_datetime[-1]+d])
-#
-#                    # bargap=0.001,
-#
-#                    )
-# fig = go.Figure(data=data, layout=layout)
-# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
-# ---------------------------------------------------------------------------------
-if __name__ == "__main__":
-
-    # plt = Plotter()
-    extr = Extractor("sensor_data.db")
-    yearly = []
-    attemp = []
-    yearly = extr.yearly_select()
-    attemp = extr.attempt()
-    if attemp == yearly:
-        print("yes")
-    attempt_x = attemp[0]
-    # attempt_x.sort(key=lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
-    attempt_x.sort()
-    # if attemp[0][0] < attemp[0][-1]:
-    #     print("yes it is")
-    # else:
-    #     print("no its not")
-    # print(attemp[0])
-    # print(len(attemp[1]) == len(attemp[0]))
-    d = timedelta(days=1)
-    trace1 = go.Scatter(
-        x=attempt_x,
-        y=attemp[1],
-        mode='lines')
-    data = [trace1]
-    # fig = go.Figure(data=data, layout=layout)
-    plotly.offline.plot(data, filename='yearly.html', auto_open=True)
-    # plt.plot_data('lines', daily_select()[0], daily_select()[1])
-    # plt.scatter_plot('lines+markers', yearly[0], yearly[1], "Daily", "TIME", yearly[2][0])
-    # print(daily[0])
-
-# ---------------------------------------------------------------------------------
-# data = [
-#     go.Bar(
-#         y=yearly_plot_y,
-#         x=yearly_datetime
-#     )
-# ]
-#
-# layout = go.Layout(
-#     title='Sampled Results',
-#     bargap=0.2)
-#
-# fig = go.Figure(data=data, layout=layout)
-# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
-
-# ---------------------------------------------------------------------------------
-
-
-# ---- PLOT DATA USING PLOTLY (works but got issues with how it shows the bars) -----
-
-# Store in plot_data the Bar Graphic Object
-# plot_data=[go.Bar(x=test_datetime, y=monthly_plot_y)]
-
-# Plot the Bar Graphic Object
-# plotly.offline.plot(fig, filename='yearly.html', auto_open=True)
-
-# print(type(monthly_plot_y[0]))
-
-# -----------------------------------------------------------------------------------
-
-
-# get_max_all()
-# get_min_all()
-# get_count_all()
-# get_sum_all()
-# get_avg_all()
-# weekly_select()
-# "SELECT TIME, CASE WHEN DATETIME(%s, '-7 days') \
-#      == DATETIME(%s) THEN 'TRUE' END FROM sensor" % (last_date, wtf)
-
-# """SELECT CASE
-#  WHEN DATEDIFF(week, %s, TIME) == 1 THEN 'TRUE'
-#  ELSE 'FALSE'
-#  END
-# , *
-# FROM sensor""" % last_date
-#
-
-# last_date_query = """SELECT TIME FROM sensor ORDER BY TIME DESC LIMIT 1"""
-# last_date = db.select_values(last_date_query)
-# print(last_date)
-
-# lista = db.select_all()
-# # pp.pprint(lista)
-#
-# weekly = []
-# for dates in range(len(lista)):
-#     if datetime.strptime(lista[dates][-1], "%Y-%m-%dT%H:%M:%S.0%fZ") < \
-#             datetime.strptime(lista[-1][-1], "%Y-%m-%dT%H:%M:%S.0%fZ"):
-#         weekly.append(lista[dates][-1])
-#     # dummy = datetime.strptime(lista[date][-1], "%Y-%m-%dT%H:%M:%S.0%fZ")
-#
-#     # print(lista[dates][-1])
-# print(weekly)
-#
-# """SELECT *
-# FROM sensor
-# WHERE TIME BETWEEN DATETIME("2015-12-09T18:02:44.000000Z", '-7 days')\
-# AND DATETIME ("2015-12-09T18:02:44.000000Z") """
