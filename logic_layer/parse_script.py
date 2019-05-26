@@ -1,9 +1,7 @@
 from data_layer.create_db import DatabaseInteraction
 from logic_layer.parse_data import Parser
 import os
-from datetime import date, time, datetime
-import pprint
-import sys
+from datetime import datetime
 
 
 class XMLImporter:
@@ -19,12 +17,7 @@ class XMLImporter:
         db.create_table("sensor")
         data = []
         mode = 0
-        # dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        # db = DatabaseInteraction("sensor_data.db")
-        # db.clear_table("sensor")
-
-        # sensor_name = None
         # Searches the current directory and every one below for every file that ends with .xml and parses it
 
         for subdir, dirs, files in os.walk(dir_path):
@@ -46,8 +39,6 @@ class XMLImporter:
                         data.append(prs.fetch_values())
                     else:
                         pass
-                    # if prs.fetch_values()[0] == "CM" and not sensor_name:
-                    #     sensor_name = prs.fetch_name()
 
         if mode == 1:
             data.sort(key=lambda x: datetime.strptime(x[2], "%Y-%m-%dT%H:%M:%S.0%fZ"))
@@ -55,8 +46,6 @@ class XMLImporter:
             data.sort(key=lambda x: datetime.strptime(x[2], "%Y-%m-%dT%H:%M:%S.%fZ"))
         else:
             print("ERROR : datetime format is not correct")
-        # pp = pprint.PrettyPrinter(indent=2)
-        # pp.pprint(data)
         if len(data) == 0:
             return False
 
@@ -64,19 +53,3 @@ class XMLImporter:
             db.insert_values("sensor", values)
 
         return True
-
-# sensor_date = "2015-10-26T11:40:33.0000000Z"
-
-# T%H:%M:S.0%fZ datetime.datetime.strptime("2008-09-03T20:56:35.450686Z", "%Y-%m-%dT%H:%M:%S.%fZ")
-# # not official iso format, exei 7 digits gia ta microseconds anti gia 6..
-# new = datetime.strptime(sensor_date, "%Y-%m-%dT%H:%M:%S.0%fZ")
-# print(new)
-
-# new = datetime.fromisoformat(sensor_date)
-# print(new)
-#
-# new1 = datetime.now().isoformat()
-# print(new1)
-#
-# new2 = datetime.strptime(new1, "%Y-%m-%dT%H:%M:%S.%f")
-# print(new2)
