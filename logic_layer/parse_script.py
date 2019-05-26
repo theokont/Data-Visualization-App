@@ -26,8 +26,8 @@ class XMLImporter:
 
                 if filepath.endswith(".xml"):
                     prs = Parser(filepath)
-        # Adds only the files that have UNIT = CM because the file with xmls contains more data from other
-        # sensors while it shouldn't, also fixes timestamp to isoformat (will be removed later probably)
+                    
+        # Fixes timestamp to isoformat (sensor data i got had one extra digit which i remove here)
                     if len(prs.fetch_values()[2]) == 28:
                         mode = 1
                         datetime_fixed = prs.fetch_values()[2][0:20] + prs.fetch_values()[2][21:28]
