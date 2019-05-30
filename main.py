@@ -1,4 +1,4 @@
-from PySide2.QtCore import QDate, Qt
+from PySide2.QtCore import QDate, Qt, QStringListModel
 from PySide2.QtWidgets import (QApplication, QCalendarWidget,
                                QComboBox, QDateEdit, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
                                QLayout, QWidget, QPushButton, QLineEdit, QVBoxLayout,
@@ -148,7 +148,7 @@ class Window(QWidget):
         self.cal_options.addLayout(self.multi_go_layout, 6, 0)
         self.cal_options.addWidget(self.multi_go_plot_button, 7, 0)
 
-        self.avail_db_combo_reload.clicked.connect(self.reload_db_combo())
+        self.avail_db_combo_reload.clicked.connect(self.reload_db_combo)
         self.custom_plot_button.clicked.connect(self.custom_plot_script)
         # Connect multi_go buttons
         self.multi_go_add_button.clicked.connect(self.add_go_script)
@@ -172,6 +172,7 @@ class Window(QWidget):
     def available_db_combo(self):
 
         db_files = []
+        db_list_model = QStringListModel()
 
         for subdir, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__))):
             for file in files:
@@ -181,7 +182,9 @@ class Window(QWidget):
                     if filepath not in db_files:
                         db_files.append(file)
 
-        return db_files
+        db_list_model.setStringList(db_files)
+
+        return db_list_model.stringList()
 
     def add_go_script(self):
 
