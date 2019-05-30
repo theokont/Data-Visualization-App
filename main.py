@@ -1,8 +1,7 @@
-from PySide2.QtCore import QDate, QLocale, Qt
-from PySide2.QtGui import QFont, QTextCharFormat
-from PySide2.QtWidgets import (QApplication, QCalendarWidget, QCheckBox,
+from PySide2.QtCore import QDate, Qt
+from PySide2.QtWidgets import (QApplication, QCalendarWidget,
                                QComboBox, QDateEdit, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QLayout, QWidget, QPushButton, QMainWindow, QLineEdit, QVBoxLayout,
+                               QLayout, QWidget, QPushButton, QLineEdit, QVBoxLayout,
                                QMessageBox)
 from datetime import datetime
 import os
@@ -14,6 +13,9 @@ from logic_layer.plotter import Plotter
 
 
 class Window(QWidget):
+    go_list = []
+    unit = None
+
     def __init__(self):
         super(Window, self).__init__()
 
@@ -28,7 +30,7 @@ class Window(QWidget):
         layout.addWidget(self.db_util_groupbox, 1, 0)
         layout.addWidget(self.ready_plt_groupbox, 1, 1)
 
-        # layout.setSizeConstraint(QLayout.SetFixedSize)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(layout)
         self.previewLayout.setRowMinimumHeight(0,
                                                self.calendar.sizeHint().height())
@@ -42,7 +44,7 @@ class Window(QWidget):
 
         # db_entry_layout
         self.db_entry_layout = QHBoxLayout()
-        self.db_entry_field = QLineEdit("")
+        self.db_entry_field = QLineEdit("tasos.db")
         self.db_entry_label = QLabel("Set Database")
         self.db_entry_set_button = QPushButton("Set")
 
@@ -70,6 +72,16 @@ class Window(QWidget):
         self.calendar_chart_field.addItem("Scatter")
         self.calendar_chart_field.addItem("Bars")
         self.chart_label.setBuddy(self.calendar_chart_field)
+
+        # Create available db QComboBox
+        self.avail_db_combo = QComboBox()
+        self.avail_db_combo.addItems(self.available_db_combo())
+        self.avail_db_combo_reload = QPushButton("Reload")
+
+        # Create QHBoxLayout for avail_db_combo
+        self.avail_db_combo_layout = QHBoxLayout()
+        self.avail_db_combo_layout.addWidget(self.avail_db_combo)
+        self.avail_db_combo_layout.addWidget(self.avail_db_combo_reload)
 
         # Mode Layout
         self.h_mode_layout = QHBoxLayout()
@@ -101,11 +113,21 @@ class Window(QWidget):
         self.to_date.setDate(self.calendar.selectedDate())
         self.update_to_date.clicked.connect(self.to_selectedDateChanged)
 
+        # Multiple graphic objects layout
+        self.multi_go_label = QLabel("Plot multiple graphic objects")
+        self.multi_go_layout = QHBoxLayout()
+        self.multi_go_add_button = QPushButton("Add Graphic Object")
+        self.multi_go_clear_button = QPushButton("Clear Graphic Objects")
+        self.multi_go_plot_button = QPushButton("Plot Graphic Objects")
+
+        # Adds widges to multi_go_layout
+        self.multi_go_layout.addWidget(self.multi_go_add_button)
+        self.multi_go_layout.addWidget(self.multi_go_clear_button)
+        # self.multi_go_layout.addWidget(self.multi_go_plot_button)
+
         # Adds widgets to to_date_layout QHBoxLayout
         self.to_date_layout.addWidget(self.to_date)
         self.to_date_layout.addWidget(self.update_to_date)
-
-        # self.calendar.selectionChanged.connect(self.to_selectedDateChanged)
 
         # Add widgets and QHBoxLayout to our QVBoxLayout
         self.from_to_dates_layout.addWidget(self.from_date_label)
@@ -115,17 +137,119 @@ class Window(QWidget):
 
         self.custom_plot_button = QPushButton("Custom Plot")
 
-        self.cal_options.addLayout(self.db_entry_layout, 0, 0)
-        self.cal_options.addLayout(self.h_mode_layout, 1, 0)
-        self.cal_options.addLayout(self.from_to_dates_layout, 2, 0)
-        self.cal_options.addWidget(self.custom_plot_button, 3, 0)
+        self.available_db_combo()
 
+        self.cal_options.addLayout(self.avail_db_combo_layout, 0, 0)
+        self.cal_options.addLayout(self.db_entry_layout, 1, 0)
+        self.cal_options.addLayout(self.h_mode_layout, 2, 0)
+        self.cal_options.addLayout(self.from_to_dates_layout, 3, 0)
+        self.cal_options.addWidget(self.custom_plot_button, 4, 0)
+        self.cal_options.addWidget(self.multi_go_label, 5, 0)
+        self.cal_options.addLayout(self.multi_go_layout, 6, 0)
+        self.cal_options.addWidget(self.multi_go_plot_button, 7, 0)
+
+        self.avail_db_combo_reload.clicked.connect(self.reload_db_combo())
         self.custom_plot_button.clicked.connect(self.custom_plot_script)
+        # Connect multi_go buttons
+        self.multi_go_add_button.clicked.connect(self.add_go_script)
+        self.multi_go_clear_button.clicked.connect(self.clear_go_script)
+        self.multi_go_plot_button.clicked.connect(self.multi_go_plot_script)
 
         # Add widgets and sub layout to main layout
         self.previewLayout.addWidget(self.calendar, 0, 0, Qt.AlignCenter)
         self.previewLayout.addLayout(self.cal_options, 0, 1)
         self.previewGroupBox.setLayout(self.previewLayout)
+
+    # def debug_script(self):
+    #     debug_from_date = str(self.from_date.date().toPython())
+    #     debug_to_date = str(self.to_date.date().toPython())
+    #     print(debug_from_date, debug_to_date)
+
+    def reload_db_combo(self):
+        self.avail_db_combo.clear()
+        self.avail_db_combo.addItems(self.available_db_combo())
+
+    def available_db_combo(self):
+
+        db_files = []
+
+        for subdir, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__))):
+            for file in files:
+                filepath = subdir + os.path.sep + file
+
+                if filepath.endswith(".db"):
+                    if filepath not in db_files:
+                        db_files.append(file)
+
+        return db_files
+
+    def add_go_script(self):
+
+        current_index_chart = self.calendar_chart_field.currentIndex()
+        if current_index_chart == 0:
+            chart_mode = "lines"
+        elif current_index_chart == 1:
+            chart_mode = "lines+markers"
+        elif current_index_chart == 2:
+            chart_mode = "markers"
+        elif current_index_chart == 3:
+            chart_mode = "Bars"
+        else:
+            cm_error = "Something went wrong"
+            print(cm_error)
+
+        multi_go_db = self.db_entry_field.text()
+        multi_go_extr = Extractor(multi_go_db)
+        multi_go_plt = Plotter()
+        multi_go_lists = []
+        # converts Qdate object to python date object
+        go_from_date = str(self.from_date.date().toPython())
+        go_to_date = str(self.to_date.date().toPython())
+
+        multi_go_lists = multi_go_extr.custom_select(go_from_date, go_to_date)
+
+        # graph_object = multi_go_plt.go_scatter(
+        #     chart_mode, multi_go_lists[0], multi_go_lists[1], multi_go_db)
+        go_data = multi_go_plt.go_scatter(
+            chart_mode, multi_go_lists[0], multi_go_lists[1], multi_go_db)
+        Window.go_list.append(go_data)
+        if Window.unit is None:
+            Window.unit = multi_go_lists[2][0]
+
+    def clear_go_script(self):
+        Window.go_list.clear()
+        Window.unit = None
+
+    def multi_go_plot_script(self):
+        multi_go_plt = Plotter()
+        current_index_chart = self.calendar_chart_field.currentIndex()
+        if current_index_chart == 0:
+            chart_mode = "lines"
+        elif current_index_chart == 1:
+            chart_mode = "lines+markers"
+        elif current_index_chart == 2:
+            chart_mode = "markers"
+        elif current_index_chart == 3:
+            chart_mode = "Bars"
+        else:
+            cm_error = "Something went wrong"
+            print(cm_error)
+
+        # trial = Window.go_list[: len(Window.go_list) - 1]
+        # print(Window.go_list[0])
+        # print(Window.go_list)
+        # print(trial)
+
+        if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
+            multi_go_plt.go_plot("Multiple Graphs",
+                                 "TIME", Window.unit, Window.go_list)
+        elif chart_mode == "Bars":
+            multi_go_plt.bar_plot("Multiple Graphs",
+                                  "TIME", Window.unit, Window.go_list)
+        else:
+            print("Something went wrong")
+        Window.go_list.clear()
+        Window.unit = None
 
     def custom_plot_script(self):
         current_index_chart = self.calendar_chart_field.currentIndex()
@@ -141,17 +265,16 @@ class Window(QWidget):
         else:
             cm_error = "Something went wrong"
             print(cm_error)
-        print(chart_mode)
 
         custom_db = self.db_entry_field.text()
         custom_extr = Extractor(custom_db)
         custom_plt = Plotter()
         custom_plot_lists = []
         # converts Qdate object to python date object
-        from_date = str(self.from_date.date().toPython())
-        to_date = str(self.to_date.date().toPython())
+        custom_from_date = str(self.from_date.date().toPython())
+        custom_to_date = str(self.to_date.date().toPython())
 
-        custom_plot_lists = custom_extr.custom_select(from_date, to_date)
+        custom_plot_lists = custom_extr.custom_select(custom_from_date, custom_to_date)
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
             custom_plt.scatter_plot(
