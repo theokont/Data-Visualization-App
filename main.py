@@ -48,9 +48,21 @@ class Window(QWidget):
         self.db_entry_label = QLabel("Set Database")
         self.db_entry_set_button = QPushButton("Set")
 
+        # Create available db QComboBox
+        self.avail_db_combo = QComboBox()
+        self.avail_db_combo.addItems(self.available_db_combo())
+        self.avail_db_combo_reload = QPushButton("Reload")
+
+        # Create QHBoxLayout for avail_db_combo
+        self.avail_db_combo_layout = QHBoxLayout()
+        # self.avail_db_combo_layout.addWidget(self.avail_db_combo)
+        # self.avail_db_combo_layout.addWidget(self.avail_db_combo_reload)
+
         # Adds widgets to db_entry_ayout QHBoxLayout
         self.db_entry_layout.addWidget(self.db_entry_label)
-        self.db_entry_layout.addWidget(self.db_entry_field)
+        # self.db_entry_layout.addWidget(self.db_entry_field)
+        self.db_entry_layout.addWidget(self.avail_db_combo)
+        self.db_entry_layout.addWidget(self.avail_db_combo_reload)
         self.db_entry_layout.addWidget(self.db_entry_set_button)
 
         self.db_entry_set_button.clicked.connect(self.set_db_entry_button_script)
@@ -72,16 +84,6 @@ class Window(QWidget):
         self.calendar_chart_field.addItem("Scatter")
         self.calendar_chart_field.addItem("Bars")
         self.chart_label.setBuddy(self.calendar_chart_field)
-
-        # Create available db QComboBox
-        self.avail_db_combo = QComboBox()
-        self.avail_db_combo.addItems(self.available_db_combo())
-        self.avail_db_combo_reload = QPushButton("Reload")
-
-        # Create QHBoxLayout for avail_db_combo
-        self.avail_db_combo_layout = QHBoxLayout()
-        self.avail_db_combo_layout.addWidget(self.avail_db_combo)
-        self.avail_db_combo_layout.addWidget(self.avail_db_combo_reload)
 
         # Mode Layout
         self.h_mode_layout = QHBoxLayout()
@@ -139,14 +141,14 @@ class Window(QWidget):
 
         self.available_db_combo()
 
-        self.cal_options.addLayout(self.avail_db_combo_layout, 0, 0)
-        self.cal_options.addLayout(self.db_entry_layout, 1, 0)
-        self.cal_options.addLayout(self.h_mode_layout, 2, 0)
-        self.cal_options.addLayout(self.from_to_dates_layout, 3, 0)
-        self.cal_options.addWidget(self.custom_plot_button, 4, 0)
-        self.cal_options.addWidget(self.multi_go_label, 5, 0)
-        self.cal_options.addLayout(self.multi_go_layout, 6, 0)
-        self.cal_options.addWidget(self.multi_go_plot_button, 7, 0)
+        # self.cal_options.addLayout(self.avail_db_combo_layout, 0, 0)
+        self.cal_options.addLayout(self.db_entry_layout, 0, 0)
+        self.cal_options.addLayout(self.h_mode_layout, 1, 0)
+        self.cal_options.addLayout(self.from_to_dates_layout, 2, 0)
+        self.cal_options.addWidget(self.custom_plot_button, 3, 0)
+        self.cal_options.addWidget(self.multi_go_label, 4, 0)
+        self.cal_options.addLayout(self.multi_go_layout, 5, 0)
+        self.cal_options.addWidget(self.multi_go_plot_button, 6, 0)
 
         self.avail_db_combo_reload.clicked.connect(self.reload_db_combo)
         self.custom_plot_button.clicked.connect(self.custom_plot_script)
@@ -201,7 +203,7 @@ class Window(QWidget):
             cm_error = "Something went wrong"
             print(cm_error)
 
-        multi_go_db = self.db_entry_field.text()
+        multi_go_db = self.avail_db_combo.currentText()
         multi_go_extr = Extractor(multi_go_db)
         multi_go_plt = Plotter()
         multi_go_lists = []
@@ -269,10 +271,11 @@ class Window(QWidget):
             cm_error = "Something went wrong"
             print(cm_error)
 
-        custom_db = self.db_entry_field.text()
+        custom_db = self.avail_db_combo.currentText()
         custom_extr = Extractor(custom_db)
         custom_plt = Plotter()
         custom_plot_lists = []
+        custom_plot_title = custom_db[:-3]
         # converts Qdate object to python date object
         custom_from_date = str(self.from_date.date().toPython())
         custom_to_date = str(self.to_date.date().toPython())
@@ -281,10 +284,10 @@ class Window(QWidget):
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
             custom_plt.scatter_plot(
-                chart_mode, custom_plot_lists[0], custom_plot_lists[1], custom_db,
+                chart_mode, custom_plot_lists[0], custom_plot_lists[1], custom_plot_title,
                 "TIME", custom_plot_lists[2][0])
         elif chart_mode == "Bars":
-            custom_plt.bar_plot(custom_plot_lists[0], custom_plot_lists[1], custom_db,
+            custom_plt.bar_plot(custom_plot_lists[0], custom_plot_lists[1], custom_plot_title,
                                 "TIME", custom_plot_lists[2][0])
         else:
             print("Something went wrong")
@@ -465,7 +468,7 @@ class Window(QWidget):
 
     def set_db_entry_button_script(self):
 
-        self.db = DatabaseInteraction(self.db_entry_field.text())
+        self.db = DatabaseInteraction(self.avail_db_combo.currentText())
         extr = Extractor(self.db.name)
     # Create datetime objects of the first and last strings of date
         self.datetime_first = datetime.strptime(extr.select_first_row()[
@@ -481,11 +484,30 @@ class Window(QWidget):
         self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
         self.calendar.setMinimumDate(self.first_row)
         self.calendar.setMaximumDate(self.last_row)
+    # def set_db_entry_button_script(self):
+    #
+    #     self.db = DatabaseInteraction(self.db_entry_field.text())
+    #     extr = Extractor(self.db.name)
+    # # Create datetime objects of the first and last strings of date
+    #     self.datetime_first = datetime.strptime(extr.select_first_row()[
+    #         0][0], "%Y-%m-%dT%H:%M:%S.%fZ")
+    #     self.datetime_last = datetime.strptime(extr.select_last_row()[
+    #         0][0], "%Y-%m-%dT%H:%M:%S.%fZ")
+    #     self.first_row = QDate.fromString(str(self.datetime_first.date()), "yyyy-MM-dd")
+    #     self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
+    #     self.calendar.setMinimumDate(self.first_row)
+    #     self.calendar.setMaximumDate(self.last_row)
+    #
+    #     self.first_row = QDate.fromString(str(self.datetime_first.date()), "yyyy-MM-dd")
+    #     self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
+    #     self.calendar.setMinimumDate(self.first_row)
+    #     self.calendar.setMaximumDate(self.last_row)
 
     def ready_plot_script(self):
         db = self.choose_db_field.text()
         extr = Extractor(db)
         plt = Plotter()
+        ready_plot_title = db[:-3]
 
         if self.chart_field.currentIndex() == 0:
             chart_mode = "lines"
@@ -514,9 +536,10 @@ class Window(QWidget):
         plot_lists = extr.extract(plot_mode)
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
-            plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1], db, "TIME", plot_lists[2][0])
+            plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
+                             ready_plot_title, "TIME", plot_lists[2][0])
         elif chart_mode == "Bars":
-            plt.bar_plot(plot_lists[0], plot_lists[1], db, "TIME", plot_lists[2][0])
+            plt.bar_plot(plot_lists[0], plot_lists[1], ready_plot_title, "TIME", plot_lists[2][0])
         else:
             print("Something went wrong")
 
