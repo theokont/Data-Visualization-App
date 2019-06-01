@@ -40,4 +40,3 @@ class DatabaseInteraction:
     def clear_table(self):
         self.cur.execute("""DELETE FROM sensor""")
         self.conn.commit()
-
