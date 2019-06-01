@@ -116,11 +116,11 @@ class Window(QWidget):
         self.update_to_date.clicked.connect(self.to_selectedDateChanged)
 
         # Multiple graphic objects layout
-        self.multi_go_label = QLabel("Plot multiple graphic objects")
+        self.multi_go_label = QLabel("Plot multiple graph objects")
         self.multi_go_layout = QHBoxLayout()
-        self.multi_go_add_button = QPushButton("Add Graphic Object")
-        self.multi_go_clear_button = QPushButton("Clear Graphic Objects")
-        self.multi_go_plot_button = QPushButton("Plot Graphic Objects")
+        self.multi_go_add_button = QPushButton("Add Graph Object")
+        self.multi_go_clear_button = QPushButton("Clear Graph Objects")
+        self.multi_go_plot_button = QPushButton("Plot Graph Objects")
 
         # Adds widges to multi_go_layout
         self.multi_go_layout.addWidget(self.multi_go_add_button)
@@ -158,7 +158,7 @@ class Window(QWidget):
         self.multi_go_plot_button.clicked.connect(self.multi_go_plot_script)
 
         # Add widgets and sub layout to main layout
-        self.previewLayout.addWidget(self.calendar, 0, 0, Qt.AlignCenter)
+        self.previewLayout.addWidget(self.calendar, 0, 0, Qt.AlignTop)  # , Qt.AlignCenter
         self.previewLayout.addLayout(self.cal_options, 0, 1)
         self.previewGroupBox.setLayout(self.previewLayout)
 
@@ -422,7 +422,7 @@ class Window(QWidget):
         self.chart_field.addItem("Lines and Markers")
         self.chart_field.addItem("Scatter")
         self.chart_field.addItem("Bars")
-        self.plot_mode_label = QLabel("Choose what chronic period to plot")
+        self.plot_mode_label = QLabel("Choose what time period to plot")
         self.plot_mode_field = QComboBox()
         self.plot_mode_field.addItem("Daily")
         self.plot_mode_field.addItem("Weekly")
@@ -534,14 +534,55 @@ class Window(QWidget):
         plot_lists = []
         # Extract from the database the data for x-y axis and the unit
         plot_lists = extr.extract(plot_mode)
+        # try using avg_all
+        # print(extr.get_sum_all()[0][0])
 
+        # if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
+        #     plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
+        #                      ready_plot_title, "TIME", plot_lists[2][0])
+        # elif chart_mode == "Bars":
+        #     plt.bar_plot(plot_lists[0], plot_lists[1], ready_plot_title, "TIME", plot_lists[2][0])
+        # else:
+        #     print("Something went wrong")
+        ready_plot_error = "Error while plotting"
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
-            plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
-                             ready_plot_title, "TIME", plot_lists[2][0])
+            try:
+                ready_plot_success = plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
+                                                      ready_plot_title, "TIME", plot_lists[2][0])
+            except Exception as exc:
+                ready_plot_success = False
+                ready_plot_error = exc
         elif chart_mode == "Bars":
-            plt.bar_plot(plot_lists[0], plot_lists[1], ready_plot_title, "TIME", plot_lists[2][0])
+            try:
+                ready_plot_success = plt.bar_plot(plot_lists[0], plot_lists[1],
+                                                  ready_plot_title, "TIME", plot_lists[2][0])
+            except Exception as exc:
+                ready_plot_success = False
+                ready_plot_error = exc
         else:
             print("Something went wrong")
+
+        ready_plot_msg = QMessageBox()
+
+        if ready_plot_success:
+            ready_plot_msg.setIcon(QMessageBox.Information)
+            ready_plot_msg.setText("Plotting status")
+            ready_plot_msg.setInformativeText("Plot was successful")
+            ready_plot_msg.setWindowTitle("Plot complete!")
+            # ready_plot_msg.setDetailedText("The details are as follows:\nDatabase \
+            # name: {0}\nUnit of sensors: \nPath of .xml "
+            #                                "files: {1}".format(db, path))
+            ready_plot_msg.setStandardButtons(QMessageBox.Ok)
+        else:
+            ready_plot_msg.setIcon(QMessageBox.Critical)
+            ready_plot_msg.setText("Database import failed!")
+            ready_plot_msg.setInformativeText("Oops")
+            ready_plot_msg.setWindowTitle("Database import failed!")
+            ready_plot_msg.setDetailedText("ERROR:\n {0}".format(ready_plot_error))
+            ready_plot_msg.setStandardButtons(QMessageBox.Retry | QMessageBox.Abort)
+
+        ret_ready_plot = ready_plot_msg.exec_()
+        ready_plot_msg.show()
 
 
 if __name__ == "__main__":
