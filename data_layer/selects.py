@@ -73,6 +73,7 @@ class Extractor:
     # Average of the values by unit
 
     def get_avg_all(self):
+        # "SELECT AVG(VALUE) as AVG_OF_VALUES, UNIT FROM sensor GROUP BY UNIT"
         query = "SELECT AVG(VALUE) as AVG_OF_VALUES, UNIT FROM sensor GROUP BY UNIT"
         avg_all = self.db.select_values(query)
         return avg_all
@@ -89,7 +90,7 @@ class Extractor:
 
     def custom_select(self, from_time, to_time):
         custom_query = "SELECT * FROM sensor WHERE TIME BETWEEN  DATE(\"" + \
-            from_time + "\", '-7 days') AND DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
             to_time + "\")"
         custom = self.db.select_values(custom_query)
 
