@@ -10,6 +10,7 @@ import sys
 from data_layer.create_db import DatabaseInteraction
 from logic_layer.parse_script import XMLImporter
 from logic_layer.plotter import Plotter
+import pyperclip
 
 
 class Window(QWidget):
@@ -197,8 +198,6 @@ class Window(QWidget):
         min_error = "Something went wrong while retrieving min"
         min_db = self.avail_db_combo.currentText() + ".db"
         min_extr = Extractor(min_db)
-        # min_stat = min_extr.get_min(min_from_date, min_to_date)
-        # print(min_stat[0][0])
 
         try:
             min_stat = min_extr.get_min(min_from_date, min_to_date)
@@ -210,12 +209,14 @@ class Window(QWidget):
 
         if min_success:
             min_msg.setIcon(QMessageBox.Information)
-            min_msg.setText("Min value")
+            min_msg.setText("Min value for the selected sensor and dates")
             min_msg.setInformativeText(
                 "Min value: {0}".format(min_stat[0][0]))
             min_msg.setWindowTitle("Min Value")
-            # min_msg.setStandardButtons(QMessageBox.Clipboard)
-            min_msg.setStandardButtons(QMessageBox.Abort)
+            copy_min_to_clip = min_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            min_msg.setStandardButtons(QMessageBox.Close)
+            min_msg.setDefaultButton(copy_min_to_clip)
         else:
             min_msg.setIcon(QMessageBox.Critical)
             min_msg.setText("Getting Min Value Failed!")
@@ -226,7 +227,11 @@ class Window(QWidget):
             min_msg.setStandardButtons(QMessageBox.Abort)
 
         min_retval = min_msg.exec_()
+        copy_min_to_clip.clicked.connect(self.copy_min_to_clipboard(min_stat[0][0]))
         min_msg.show()
+
+    def copy_min_to_clipboard(self, var):
+        pyperclip.copy(var)
 
     def add_go_script(self):
 
