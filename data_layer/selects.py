@@ -56,6 +56,15 @@ class Extractor:
         min_all = self.db.select_values(query)
         return min_all
 
+    # Get min for the selected dates
+
+    def get_min(self, from_time, to_time):
+        query = "SELECT MIN(VALUE) as MIN FROM sensor WHERE TIME BETWEEN DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
+            to_time + "\", '+1 day')"
+        min = self.db.select_values(query)
+        return min
+
     # Get number of rows by unit
 
     def get_count_all(self):
@@ -91,7 +100,7 @@ class Extractor:
     def custom_select(self, from_time, to_time):
         custom_query = "SELECT * FROM sensor WHERE TIME BETWEEN  DATE(\"" + \
             from_time + "\") AND DATE(\"" + \
-            to_time + "\")"
+            to_time + "\", '+1 day')"
         custom = self.db.select_values(custom_query)
 
         custom_plot_x = []
@@ -116,7 +125,7 @@ class Extractor:
 
         weekly_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
             last_date[0][0] + "\", '-7 days') AND TIME <= DATETIME(\"" + \
-            last_date[0][0] + "\")"
+            last_date[0][0] + "\", '+1 day')"
         weekly = self.db.select_values(weekly_query)
 
         weekly_plot_x = []
@@ -142,7 +151,7 @@ class Extractor:
 
         monthly_query = "SELECT * FROM sensor WHERE TIME >= DATETIME(\"" + \
             last_date[0][0] + "\", 'start of month') AND TIME <= DATETIME(\"" +\
-            last_date[0][0] + "\")"
+            last_date[0][0] + "\",'+1 day')"
 
         monthly = self.db.select_values(monthly_query)
 
@@ -171,7 +180,7 @@ class Extractor:
 
         yearly_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
             last_date[0][0] + "\", 'start of year') AND DATETIME(\"" +\
-            last_date[0][0] + "\")"
+            last_date[0][0] + "\", '+1 day')"
 
         yearly = self.db.select_values(yearly_query)
 
@@ -197,8 +206,8 @@ class Extractor:
         last_date = self.db.select_values(query)
 
         daily_query = "SELECT * FROM sensor WHERE TIME BETWEEN DATETIME(\"" + \
-            last_date[0][0] + "\", '-1 day') AND DATETIME(\"" +\
-            last_date[0][0] + "\")"
+            last_date[0][0] + "\") AND DATETIME(\"" +\
+            last_date[0][0] + "\", '+1 day')"
 
         daily = self.db.select_values(daily_query)
 
