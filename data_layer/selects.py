@@ -65,6 +65,53 @@ class Extractor:
         min = self.db.select_values(query)
         return min
 
+    # Get max for the selected dates
+
+    def get_max(self, from_time, to_time):
+        query = "SELECT MAX(VALUE) as MAX FROM sensor WHERE TIME BETWEEN DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
+            to_time + "\", '+1 day')"
+        max = self.db.select_values(query)
+        return max
+
+    # Get avg for the selected dates
+
+    def get_avg(self, from_time, to_time):
+        query = "SELECT AVG(VALUE) as AVG_OF_VALUES FROM sensor WHERE TIME BETWEEN DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
+            to_time + "\", '+1 day')"
+        avg = self.db.select_values(query)
+        return avg
+
+    # Get count for the selected dates
+
+    def get_count(self, from_time, to_time):
+        query = "SELECT COUNT(*) as COUNT FROM sensor WHERE TIME BETWEEN DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
+            to_time + "\", '+1 day')"
+        count = self.db.select_values(query)
+        return count
+
+    # Get sum for the selected dates
+
+    def get_sum(self, from_time, to_time):
+        query = "SELECT SUM(VALUE) as SUM_OF_UNIT_VALUES FROM sensor WHERE TIME BETWEEN DATE(\"" + \
+            from_time + "\") AND DATE(\"" + \
+            to_time + "\", '+1 day')"
+        sum = self.db.select_values(query)
+        return sum
+
+    # Get average to max count for the selected dates
+
+    def get_avg_to_max_count(self, avg, max, from_time, to_time):
+        query = "SELECT COUNT(*) as COUNT FROM sensor WHERE VALUE BETWEEN \"" + \
+            avg + "\" AND \"" + \
+            max + "\" AND TIME BETWEEN DATE(\"" + \
+                from_time + "\") AND DATE(\"" + \
+                to_time + "\", '+1 day')"
+        avgToMax_count = self.db.select_values(query)
+        return avgToMax_count
+
     # Get number of rows by unit
 
     def get_count_all(self):
