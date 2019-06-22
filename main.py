@@ -167,6 +167,7 @@ class Window(QWidget):
         self.avg = QPushButton("Get Average")
         self.count = QPushButton("Get Count Of Measurements")
         self.sum = QPushButton("Get Total Sum")
+        self.avg_to_max = QPushButton("Get Count Between Avg-Max")
 
         self.stats_first_qhbox_layout = QHBoxLayout()
         self.stats_first_qhbox_layout.addWidget(self.min)
@@ -176,6 +177,7 @@ class Window(QWidget):
         self.stats_second_qhbox_layout = QHBoxLayout()
         self.stats_second_qhbox_layout.addWidget(self.count)
         self.stats_second_qhbox_layout.addWidget(self.sum)
+        self.stats_second_qhbox_layout.addWidget(self.avg_to_max)
 
         self.stats_qvbox_layout = QVBoxLayout()
         self.stats_qvbox_layout.addWidget(self.stats_label)
@@ -184,6 +186,11 @@ class Window(QWidget):
 
         # Connect stats buttons when clicked
         self.min.clicked.connect(self.get_min_script)
+        self.max.clicked.connect(self.get_max_script)
+        self.avg.clicked.connect(self.get_avg_script)
+        self.count.clicked.connect(self.get_count_script)
+        self.sum.clicked.connect(self.get_sum_script)
+        self.avg_to_max.clicked.connect(self.get_avg_to_max_count_script)
 
         # Add widgets and sub layout to main layout
         self.previewLayout.addWidget(self.calendar, 0, 0, Qt.AlignTop)  # , Qt.AlignCenter
@@ -191,6 +198,205 @@ class Window(QWidget):
         self.previewLayout.addLayout(self.stats_qvbox_layout, 1, 0)
         self.previewLayout.addLayout(self.multi_qvbox_layout, 1, 1)
         self.previewGroupBox.setLayout(self.previewLayout)
+
+    def get_avg_to_max_count_script(self):
+        avgToMax_from_date = str(self.from_date.date().toPython())
+        avgToMax_to_date = str(self.to_date.date().toPython())
+        avgToMax_error = "Something went wrong while retrieving the percentage"
+        avgToMax_db = self.avail_db_combo.currentText() + ".db"
+        avgToMax_extr = Extractor(avgToMax_db)
+
+        try:
+            total_count = avgToMax_extr.get_count(avgToMax_from_date, avgToMax_to_date)
+            avgToMax_avg = avgToMax_extr.get_avg(avgToMax_from_date, avgToMax_to_date)
+            avgToMax_max = avgToMax_extr.get_max(avgToMax_from_date, avgToMax_to_date)
+            atm_avg = avgToMax_avg[0][0]
+            atm_max = avgToMax_max[0][0]
+            avgToMax_count = avgToMax_extr.get_avg_to_max_count(
+                str(atm_avg), str(atm_max), avgToMax_from_date, avgToMax_to_date)
+            avgToMax_percentage = (avgToMax_count[0][0]/total_count[0][0])
+            print(avgToMax_count[0][0], total_count[0][0])
+            avgToMax_success = True
+        except Exception as ex:
+            avgToMax_success = False
+            avgToMax_error = ex
+        avgToMax_msg = QMessageBox()
+
+        if avgToMax_success:
+            avgToMax_msg.setIcon(QMessageBox.Information)
+            avgToMax_msg.setText(
+                "Percentage of values between average and max for the selected sensor and dates")
+            avgToMax_msg.setInformativeText(
+                "Avg to Max percentage: {0} %".format(avgToMax_percentage*100))
+            avgToMax_msg.setWindowTitle("Avg to Max percentage")
+            copy_avgToMax_to_clip = avgToMax_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            avgToMax_msg.setStandardButtons(QMessageBox.Close)
+            avgToMax_msg.setDefaultButton(copy_avgToMax_to_clip)
+        else:
+            avgToMax_msg.setIcon(QMessageBox.Critical)
+            avgToMax_msg.setText("Getting Avg to Max Percentage Failed!")
+            avgToMax_msg.setInformativeText(
+                "Getting Avg to Max percentage from {0} failed!".format(self.avail_db_combo.currentText()))
+            avgToMax_msg.setWindowTitle("ERROR!")
+            avgToMax_msg.setDetailedText("ERROR:\n {0}".format(avgToMax_error))
+            avgToMax_msg.setStandardButtons(QMessageBox.Abort)
+
+        avgToMax_retval = avgToMax_msg.exec_()
+        copy_avgToMax_to_clip.clicked.connect(self.copy_to_clipboard(avgToMax_percentage))
+        avgToMax_msg.show()
+
+    def get_sum_script(self):
+        sum_from_date = str(self.from_date.date().toPython())
+        sum_to_date = str(self.to_date.date().toPython())
+        sum_error = "Something went wrong while retrieving sum"
+        sum_db = self.avail_db_combo.currentText() + ".db"
+        sum_extr = Extractor(sum_db)
+
+        try:
+            sum_stat = sum_extr.get_sum(sum_from_date, sum_to_date)
+            sum_success = True
+        except Exception as ex:
+            sum_success = False
+            sum_error = ex
+        sum_msg = QMessageBox()
+
+        if sum_success:
+            sum_msg.setIcon(QMessageBox.Information)
+            sum_msg.setText("Sum value for the selected sensor and dates")
+            sum_msg.setInformativeText(
+                "Sum value: {0}".format(sum_stat[0][0]))
+            sum_msg.setWindowTitle("sum Value")
+            copy_sum_to_clip = sum_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            sum_msg.setStandardButtons(QMessageBox.Close)
+            sum_msg.setDefaultButton(copy_sum_to_clip)
+        else:
+            sum_msg.setIcon(QMessageBox.Critical)
+            sum_msg.setText("Getting Sum Value Failed!")
+            sum_msg.setInformativeText(
+                "Getting sum value from {0} failed!".format(self.avail_db_combo.currentText()))
+            sum_msg.setWindowTitle("ERROR!")
+            sum_msg.setDetailedText("ERROR:\n {0}".format(sum_error))
+            sum_msg.setStandardButtons(QMessageBox.Abort)
+
+        sum_retval = sum_msg.exec_()
+        copy_sum_to_clip.clicked.connect(self.copy_to_clipboard(sum_stat[0][0]))
+        sum_msg.show()
+
+    def get_count_script(self):
+        count_from_date = str(self.from_date.date().toPython())
+        count_to_date = str(self.to_date.date().toPython())
+        count_error = "Something went wrong while retrieving count"
+        count_db = self.avail_db_combo.currentText() + ".db"
+        count_extr = Extractor(count_db)
+
+        try:
+            count_stat = count_extr.get_count(count_from_date, count_to_date)
+            count_success = True
+        except Exception as ex:
+            count_success = False
+            count_error = ex
+        count_msg = QMessageBox()
+
+        if count_success:
+            count_msg.setIcon(QMessageBox.Information)
+            count_msg.setText("Count value for the selected sensor and dates")
+            count_msg.setInformativeText(
+                "count value: {0}".format(count_stat[0][0]))
+            count_msg.setWindowTitle("Count Value")
+            copy_count_to_clip = count_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            count_msg.setStandardButtons(QMessageBox.Close)
+            count_msg.setDefaultButton(copy_count_to_clip)
+        else:
+            count_msg.setIcon(QMessageBox.Critical)
+            count_msg.setText("Getting Count Value Failed!")
+            count_msg.setInformativeText(
+                "Getting count value from {0} failed!".format(self.avail_db_combo.currentText()))
+            count_msg.setWindowTitle("ERROR!")
+            count_msg.setDetailedText("ERROR:\n {0}".format(count_error))
+            count_msg.setStandardButtons(QMessageBox.Abort)
+
+        count_retval = count_msg.exec_()
+        copy_count_to_clip.clicked.connect(self.copy_to_clipboard(count_stat[0][0]))
+        count_msg.show()
+
+    def get_avg_script(self):
+        avg_from_date = str(self.from_date.date().toPython())
+        avg_to_date = str(self.to_date.date().toPython())
+        avg_error = "Something went wrong while retrieving avg"
+        avg_db = self.avail_db_combo.currentText() + ".db"
+        avg_extr = Extractor(avg_db)
+
+        try:
+            avg_stat = avg_extr.get_avg(avg_from_date, avg_to_date)
+            avg_success = True
+        except Exception as ex:
+            avg_success = False
+            avg_error = ex
+        avg_msg = QMessageBox()
+
+        if avg_success:
+            avg_msg.setIcon(QMessageBox.Information)
+            avg_msg.setText("Avg value for the selected sensor and dates")
+            avg_msg.setInformativeText(
+                "Avg value: {0}".format(avg_stat[0][0]))
+            avg_msg.setWindowTitle("Avg Value")
+            copy_avg_to_clip = avg_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            avg_msg.setStandardButtons(QMessageBox.Close)
+            avg_msg.setDefaultButton(copy_avg_to_clip)
+        else:
+            avg_msg.setIcon(QMessageBox.Critical)
+            avg_msg.setText("Getting Avg Value Failed!")
+            avg_msg.setInformativeText(
+                "Getting avg value from {0} failed!".format(self.avail_db_combo.currentText()))
+            avg_msg.setWindowTitle("ERROR!")
+            avg_msg.setDetailedText("ERROR:\n {0}".format(avg_error))
+            avg_msg.setStandardButtons(QMessageBox.Abort)
+
+        avg_retval = avg_msg.exec_()
+        copy_avg_to_clip.clicked.connect(self.copy_to_clipboard(avg_stat[0][0]))
+        avg_msg.show()
+
+    def get_max_script(self):
+        max_from_date = str(self.from_date.date().toPython())
+        max_to_date = str(self.to_date.date().toPython())
+        max_error = "Something went wrong while retrieving max"
+        max_db = self.avail_db_combo.currentText() + ".db"
+        max_extr = Extractor(max_db)
+
+        try:
+            max_stat = max_extr.get_max(max_from_date, max_to_date)
+            max_success = True
+        except Exception as ex:
+            max_success = False
+            max_error = ex
+        max_msg = QMessageBox()
+
+        if max_success:
+            max_msg.setIcon(QMessageBox.Information)
+            max_msg.setText("Max value for the selected sensor and dates")
+            max_msg.setInformativeText(
+                "Max value: {0}".format(max_stat[0][0]))
+            max_msg.setWindowTitle("Max Value")
+            copy_max_to_clip = max_msg.addButton(
+                self.tr("Copy to clipboard"), QMessageBox.AcceptRole)
+            max_msg.setStandardButtons(QMessageBox.Close)
+            max_msg.setDefaultButton(copy_max_to_clip)
+        else:
+            max_msg.setIcon(QMessageBox.Critical)
+            max_msg.setText("Getting Max Value Failed!")
+            max_msg.setInformativeText(
+                "Getting max value from {0} failed!".format(self.avail_db_combo.currentText()))
+            max_msg.setWindowTitle("ERROR!")
+            max_msg.setDetailedText("ERROR:\n {0}".format(max_error))
+            max_msg.setStandardButtons(QMessageBox.Abort)
+
+        max_retval = max_msg.exec_()
+        copy_max_to_clip.clicked.connect(self.copy_to_clipboard(max_stat[0][0]))
+        max_msg.show()
 
     def get_min_script(self):
         min_from_date = str(self.from_date.date().toPython())
@@ -227,10 +433,10 @@ class Window(QWidget):
             min_msg.setStandardButtons(QMessageBox.Abort)
 
         min_retval = min_msg.exec_()
-        copy_min_to_clip.clicked.connect(self.copy_min_to_clipboard(min_stat[0][0]))
+        copy_min_to_clip.clicked.connect(self.copy_to_clipboard(min_stat[0][0]))
         min_msg.show()
 
-    def copy_min_to_clipboard(self, var):
+    def copy_to_clipboard(self, var):
         pyperclip.copy(var)
 
     def add_go_script(self):
@@ -617,24 +823,6 @@ class Window(QWidget):
         self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
         self.calendar.setMinimumDate(self.first_row)
         self.calendar.setMaximumDate(self.last_row)
-    # def set_db_entry_button_script(self):
-    #
-    #     self.db = DatabaseInteraction(self.db_entry_field.text())
-    #     extr = Extractor(self.db.name)
-    # # Create datetime objects of the first and last strings of date
-    #     self.datetime_first = datetime.strptime(extr.select_first_row()[
-    #         0][0], "%Y-%m-%dT%H:%M:%S.%fZ")
-    #     self.datetime_last = datetime.strptime(extr.select_last_row()[
-    #         0][0], "%Y-%m-%dT%H:%M:%S.%fZ")
-    #     self.first_row = QDate.fromString(str(self.datetime_first.date()), "yyyy-MM-dd")
-    #     self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
-    #     self.calendar.setMinimumDate(self.first_row)
-    #     self.calendar.setMaximumDate(self.last_row)
-    #
-    #     self.first_row = QDate.fromString(str(self.datetime_first.date()), "yyyy-MM-dd")
-    #     self.last_row = QDate.fromString(str(self.datetime_last.date()), "yyyy-MM-dd")
-    #     self.calendar.setMinimumDate(self.first_row)
-    #     self.calendar.setMaximumDate(self.last_row)
 
     def reload_db_combo(self):
         self.avail_db_combo.clear()
