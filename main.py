@@ -465,8 +465,6 @@ class Window(QWidget):
         multi_go_lists = multi_go_extr.custom_select(go_from_date, go_to_date)
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
-            # graph_object = multi_go_plt.go_scatter(
-            #     chart_mode, multi_go_lists[0], multi_go_lists[1], multi_go_db)
             go_data = multi_go_plt.go_scatter(
                 chart_mode, multi_go_lists[0], multi_go_lists[1], multi_go_db)
             Window.go_list.append(go_data)
@@ -499,11 +497,6 @@ class Window(QWidget):
         else:
             cm_error = "Something went wrong"
             print(cm_error)
-
-        # trial = Window.go_list[: len(Window.go_list) - 1]
-        # print(Window.go_list[0])
-        # print(Window.go_list)
-        # print(trial)
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
             multi_go_plt.go_plot("Multiple Graphs",
@@ -575,7 +568,6 @@ class Window(QWidget):
 
         # Set dialog layout
         self.db_dialog_groupbox.setLayout(self.db_dialog_layout)
-        # Add button signal to greetings slot
 
         self.db_field.textChanged.connect(self.db_field_changed)
         self.button.clicked.connect(self.run_script)
@@ -666,9 +658,6 @@ class Window(QWidget):
         # Set dialog layout
         self.db_util_groupbox.setLayout(self.db_util_vbox_layout)
 
-        # Constantly update text when changed
-        # self.db_update_field.textChanged.connect(self.db_update_field_changed)
-        # self.db_clear_field.textChanged.connect(self.db_clear_field_changed)
         self.update_button.clicked.connect(self.update_script)
         self.clear_button.clicked.connect(self.clear_table_script)
         self.update_avail_db_combo_reload.clicked.connect(self.reload_db_combo)
@@ -679,7 +668,6 @@ class Window(QWidget):
         database_interaction = DatabaseInteraction(db)
         path = self.update_path_field.text()
         xml_importer = XMLImporter(database_interaction.name, path)
-        # xml_importer.import_xml()
         update_error = "Something went wrong during update"
 
         try:
@@ -729,8 +717,6 @@ class Window(QWidget):
         self.plot_mode_field.addItem("Monthly")
         self.plot_mode_field.addItem("Yearly")
         self.plot_button = QPushButton("Plot")
-        # self.chart_field.currentIndexChanged.connect(self.localeChanged)
-        # self.localeChanged(self.chart_field.currentIndex())
 
         # Create available db QComboBox for ready-plots
         self.ready_plot_avail_db_combo = QComboBox()
@@ -775,8 +761,6 @@ class Window(QWidget):
     def clear_table_script(self):
         clear_error = "Something went wrong during clearing sensor"
         db = self.clear_avail_db_combo.currentText() + ".db"
-        # db_int = DatabaseInteraction(db)
-        # clear_table.clear_table()
 
         try:
             # db_int.clear_table()
@@ -882,8 +866,6 @@ class Window(QWidget):
         plot_lists = []
         # Extract from the database the data for x-y axis and the unit
         plot_lists = extr.extract(plot_mode)
-        # try using avg_all
-        # print(extr.get_sum_all()[0][0])
 
         if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
             plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
@@ -892,45 +874,6 @@ class Window(QWidget):
             plt.bar_plot(plot_lists[0], plot_lists[1], ready_plot_title, "TIME", plot_lists[2][0])
         else:
             print("Something went wrong")
-        # ready_plot_error = "Error while plotting"
-        # if chart_mode == "lines" or chart_mode == "lines+markers" or chart_mode == "markers":
-        #     try:
-        #         ready_plot_success = plt.scatter_plot(chart_mode, plot_lists[0], plot_lists[1],
-        #                                               ready_plot_title, "TIME", plot_lists[2][0])
-        #     except Exception as exc:
-        #         ready_plot_success = False
-        #         ready_plot_error = exc
-        # elif chart_mode == "Bars":
-        #     try:
-        #         ready_plot_success = plt.bar_plot(plot_lists[0], plot_lists[1],
-        #                                           ready_plot_title, "TIME", plot_lists[2][0])
-        #     except Exception as exc:
-        #         ready_plot_success = False
-        #         ready_plot_error = exc
-        # else:
-        #     print("Something went wrong")
-
-        # ready_plot_msg = QMessageBox()
-
-        # if ready_plot_success:
-        #     ready_plot_msg.setIcon(QMessageBox.Information)
-        #     ready_plot_msg.setText("Plotting status")
-        #     ready_plot_msg.setInformativeText("Plot was successful")
-        #     ready_plot_msg.setWindowTitle("Plot complete!")
-        #     # ready_plot_msg.setDetailedText("The details are as follows:\nDatabase \
-        #     # name: {0}\nUnit of sensors: \nPath of .xml "
-        #     #                                "files: {1}".format(db, path))
-        #     ready_plot_msg.setStandardButtons(QMessageBox.Ok)
-        # else:
-        #     ready_plot_msg.setIcon(QMessageBox.Critical)
-        #     ready_plot_msg.setText("WTF Database import failed!")
-        #     ready_plot_msg.setInformativeText("Oops")
-        #     ready_plot_msg.setWindowTitle("Database import failed!")
-        #     ready_plot_msg.setDetailedText("ERROR:\n {0}".format(ready_plot_error))
-        #     ready_plot_msg.setStandardButtons(QMessageBox.Retry | QMessageBox.Abort)
-
-        # ret_ready_plot = ready_plot_msg.exec_()
-        # ready_plot_msg.show()
 
 
 if __name__ == "__main__":
