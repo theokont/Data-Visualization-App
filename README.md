@@ -26,9 +26,9 @@ After that comes the installation of the required libraries:
   
 ## Requirements  
   
-###### Data entry  
+**Data entry**  
 
 
 
-######    
+###### Data entry   
 
