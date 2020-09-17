@@ -56,12 +56,9 @@ class Window(QWidget):
 
         # Create QHBoxLayout for avail_db_combo
         self.avail_db_combo_layout = QHBoxLayout()
-        # self.avail_db_combo_layout.addWidget(self.avail_db_combo)
-        # self.avail_db_combo_layout.addWidget(self.avail_db_combo_reload)
 
         # Adds widgets to db_entry_ayout QHBoxLayout
         self.db_entry_layout.addWidget(self.db_entry_label)
-        # self.db_entry_layout.addWidget(self.db_entry_field)
         self.db_entry_layout.addWidget(self.avail_db_combo)
         self.db_entry_layout.addWidget(self.avail_db_combo_reload)
         self.db_entry_layout.addWidget(self.db_entry_set_button)
@@ -101,7 +98,6 @@ class Window(QWidget):
         self.from_date.setDisplayFormat('MMM d yyyy')
         self.from_date.setDate(self.calendar.selectedDate())
         self.update_from_date.clicked.connect(self.from_selectedDateChanged)
-        # self.calendar.selectionChanged.connect(self.from_selectedDateChanged)
 
         # Adds widgets to from_date_layout QHBoxLayout
         self.from_date_layout.addWidget(self.from_date)
@@ -126,7 +122,6 @@ class Window(QWidget):
         # Adds widges to multi_go_layout
         self.multi_go_layout.addWidget(self.multi_go_add_button)
         self.multi_go_layout.addWidget(self.multi_go_clear_button)
-        # self.multi_go_layout.addWidget(self.multi_go_plot_button)
 
         # Adds widgets to to_date_layout QHBoxLayout
         self.to_date_layout.addWidget(self.to_date)
@@ -137,7 +132,6 @@ class Window(QWidget):
         self.from_to_dates_layout.addLayout(self.from_date_layout)
         self.from_to_dates_layout.addWidget(self.to_date_label)
         self.from_to_dates_layout.addLayout(self.to_date_layout)
-
         self.custom_plot_button = QPushButton("Custom Plot")
 
         # self.available_db_combo()
