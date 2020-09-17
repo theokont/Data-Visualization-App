@@ -13,7 +13,7 @@ utc_time = str(date_only)+'T'+str(time_only) + 'Z'
 date_list = []
 date_list.append(utc_time)
 
-for i in range(1000):
+for i in range(300):
 
     time_obj = datetime.strptime(date_list[-1], "%Y-%m-%dT%H:%M:%S.%fZ")
     time = time_obj + t

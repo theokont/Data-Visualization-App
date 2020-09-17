@@ -28,7 +28,29 @@ After that comes the installation of the required libraries:
   
 **Data entry**  
 
+This app had to accept multiple XML files where each of them had the following tags:  
+
+`<UNIT> </UNIT>`  -> unit type  
+`<VALUE> </VALUE>` -> value  
+`<TIME> </TIME>`  -> timestamp  
+
+While parsing the xml files, the program searches for these three tags, so they must be included in the XML Schema  
+
+<**TIME**>  
+  
+The timestamp must be represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. This is because datetime strings must be converted to datetime
+ objects. An example of ISO 8601 format:  
+ 
+`YYYY-MM-DDTHH:MM:SS.ffffffZ`  
+ 
+## Run the app  
+  
+`python 3 app.py`  
+  
+By running the app, the Qt GUI will pop.   
+  
 
 
-###### Data entry   
+
+   
 
