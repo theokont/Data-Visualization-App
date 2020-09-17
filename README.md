@@ -38,8 +38,8 @@ While parsing the xml files, the program searches for these three tags, so they 
 
 <**TIME**>  
   
-The timestamp must be represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. This is because datetime strings must be converted to datetime
- objects. An example of ISO 8601 format:  
+The timestamp must be represented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. This is essential in
+ order to convert datetime strings to datetime objects. An example of ISO 8601 format:  
  
 `YYYY-MM-DDTHH:MM:SS.ffffffZ`  
  
