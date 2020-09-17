@@ -5,7 +5,7 @@ from PySide2.QtWidgets import (QApplication, QCalendarWidget,
                                QMessageBox)
 from datetime import datetime
 import os
-from data_layer.selects import Extractor
+from logic_layer.selects import Extractor
 import sys
 from data_layer.create_db import DatabaseInteraction
 from logic_layer.parse_script import XMLImporter
